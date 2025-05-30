@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: spacingY._7,
+    paddingVertical: spacingY._30,
   },
 
   welcomeImage: {

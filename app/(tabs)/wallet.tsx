@@ -3,14 +3,14 @@ import React from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 
-const wallet = () => {
+const Wallet = () => {
   return (
     <ScreenWrapper>
-      <Typo>wallet</Typo>
+      <Typo>Wallet</Typo>
     </ScreenWrapper>
   );
 };
 
-export default wallet;
+export default Wallet;
 
 const styles = StyleSheet.create({});
