@@ -1,5 +1,6 @@
 import { auth, firestore } from "@/config/firebase";
 import { AuthContextType, UserType } from "@/types";
+import { router } from "expo-router";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -18,19 +19,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       console.log("firebase user", firebaseUser);
-      //   if (firebaseUser) {
-      //     setUser({
-      //       uid: firebaseUser?.uid,
-      //       name: firebaseUser.displayName,
-      //       email: firebaseUser.email,
-      //     });
-      //     router.replace("/(tabs)");
-      //   } else {
-      //     setUser(null);
-      //     router.repflace("/(auth)/welcome");
-      //   }
+      if (firebaseUser) {
+        setUser({
+          uid: firebaseUser?.uid,
+          name: firebaseUser.displayName,
+          email: firebaseUser.email,
+        });
+        updateUserData(firebaseUser.uid);
+        router.replace("/(tabs)");
+      } else {
+        setUser(null);
+        router.replace("/(auth)/welcome");
+      }
     });
-  });
+
+    return () => unsub();
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -38,6 +42,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: true };
     } catch (error: any) {
       let msg = error.message;
+      console.log("error message", msg);
+      if (msg.includes("(auth)/invalid-credential")) msg = "Wrong Credentials";
+      if (msg.includes("(auth)/invalid-email")) msg = "Invalid Email";
       return { success: false, msg };
     }
   };
@@ -57,6 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: true };
     } catch (error: any) {
       let msg = error.message;
+      console.log("error message", msg);
+      if (msg.includes("(auth)/email-already-in-use"))
+        msg = "This Email Is Already In Use";
+      if (msg.includes("(auth)/invalid-email")) msg = "Invalid Email";
       return { success: false, msg };
     }
   };
