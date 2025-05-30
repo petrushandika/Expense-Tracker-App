@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { auth } from "@/config/firebase";
 import { colors } from "@/constants/theme";
@@ -15,12 +16,12 @@ const home = () => {
     await signOut(auth);
   };
   return (
-    <View>
-      <Text>home</Text>
+    <ScreenWrapper>
+      <Typo>home</Typo>
       <Button onPress={handleLogout}>
         <Typo color={colors.black}>Logout</Typo>
       </Button>
-    </View>
+    </ScreenWrapper>
   );
 };
 

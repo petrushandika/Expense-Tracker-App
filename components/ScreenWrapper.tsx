@@ -12,12 +12,12 @@ import {
 const { height } = Dimensions.get("window");
 
 const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
-  let paddingTop = Platform.OS == "ios" ? height * 0.06 : 50;
+  // let paddingTop = Platform.OS === "android" ? (StatusBar.currentHeight || 0) + 10 : height * 0.06;
   return (
     <View
       style={[
         {
-          paddingTop,
+          // paddingTop,
           flex: 1,
           backgroundColor: colors.neutral900,
         },
