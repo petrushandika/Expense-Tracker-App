@@ -21,7 +21,7 @@ export default ModalWrapper;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: isAndroid ? spacingY._15 : 50,
+    paddingTop: isAndroid ? spacingY._15 : 0,
     paddingBottom: isAndroid ? spacingY._20 : spacingY._10,
   },
 });

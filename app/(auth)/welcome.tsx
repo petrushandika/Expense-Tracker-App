@@ -25,7 +25,7 @@ const welcome = () => {
           entering={FadeIn.duration(2000)}
           source={require("../../assets/images/welcome.png")}
           style={styles.welcomeImage}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <View style={styles.footer}>
           <Animated.View

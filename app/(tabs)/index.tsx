@@ -44,7 +44,6 @@ const Home = () => {
             />
           </TouchableOpacity>
         </View>
-        import * as Icons from "phosphor-react-native";
         <ScrollView
           contentContainerStyle={styles.scrollViewStyle}
           showsVerticalScrollIndicator={false}
@@ -54,7 +53,28 @@ const Home = () => {
           </View>
 
           <TransactionList
-            data={[1, 2, 3]}
+            data={[
+              {
+                id: "1",
+                type: "expense",
+                amount: 50000,
+                category: "Food",
+                date: new Date(),
+                description: "Lunch at cafe",
+                uid: "user123",
+                walletId: "wallet123",
+              },
+              {
+                id: "2",
+                type: "income",
+                amount: 150000,
+                category: "Salary",
+                date: new Date(),
+                description: "Monthly salary",
+                uid: "user123",
+                walletId: "wallet123",
+              },
+            ]}
             loading={false}
             emptyListMessage="No Transactions added yet!"
             title="Recent Transactions"
