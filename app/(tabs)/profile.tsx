@@ -1,23 +1,25 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Typo from "@/components/Typo";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { verticalScale } from "@/utils/styling";
+import CustomAlert from "@/components/CustomAlert";
 import Header from "@/components/Header";
+import ScreenWrappper from "@/components/ScreenWrappper";
+import Typo from "@/components/Typo";
+import { auth } from "@/config/firebase";
+import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
-import { Image } from "expo-image";
 import { getProfileImage } from "@/services/imageService";
 import { accountOptionType } from "@/types";
-import * as Icons from "phosphor-react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
-import { signOut } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { verticalScale } from "@/utils/styling";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import * as Icons from "phosphor-react-native";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 const Profile = () => {
   const { user } = useAuth();
-  const router = useRouter();
+  const route = useRouter();
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
   const accountOptions: accountOptionType[] = [
     {
@@ -27,115 +29,99 @@ const Profile = () => {
       bgColor: "#6366f1",
     },
     {
-      title: "Settings",
+      title: "Setting",
       icon: <Icons.GearSix size={26} color={colors.white} weight="fill" />,
-      // routeName: "/(modals)/profileModal",
       bgColor: "#059669",
     },
     {
       title: "Privacy Policy",
       icon: <Icons.Lock size={26} color={colors.white} weight="fill" />,
-      // routeName: "/(modals)/profileModal",
       bgColor: colors.neutral600,
     },
     {
       title: "Logout",
       icon: <Icons.Power size={26} color={colors.white} weight="fill" />,
-      // routeName: "/(modals)/profileModal",
       bgColor: "#e11d48",
     },
   ];
 
   const handleLogout = async () => {
     await signOut(auth);
-  };
-
-  const showLogoutAlert = () => {
-    Alert.alert("Confirm", "Are you sure you want to logout?", [
-      {
-        text: "Cancel",
-        onPress: () => console.log("cancel logout"),
-      },
-      {
-        text: "Logout",
-        onPress: () => handleLogout(),
-        style: "destructive",
-      },
-    ]);
+    setShowLogoutModal(false);
   };
 
   const handlePress = (item: accountOptionType) => {
-    if (item.title == "Logout") {
-      showLogoutAlert();
+    if (item.title === "Logout") {
+      setShowLogoutModal(true);
+    } else if (item.routeName) {
+      route.push(item.routeName);
     }
-
-    if (item.routeName) router.push(item.routeName);
   };
 
   return (
-    <ScreenWrapper>
+    <ScreenWrappper>
       <View style={styles.container}>
         <Header title="Profile" style={{ marginVertical: spacingY._10 }} />
 
+        {/* user info */}
         <View style={styles.userInfo}>
-          <View>
-            <Image
-              source={getProfileImage(user?.image)}
-              style={styles.avatar}
-              contentFit="cover"
-              transition={100}
-            />
-          </View>
-
+          <Image
+            source={getProfileImage(user?.image)}
+            style={styles.avatar}
+            contentFit="cover"
+            transition={100}
+          />
           <View style={styles.nameContainer}>
-            <Typo size={24} fontWeight={"600"} color={colors.neutral100}>
+            <Typo size={24} fontWeight="600" color={colors.neutral200}>
               {user?.name}
             </Typo>
             <Typo size={15} color={colors.neutral400}>
               {user?.email}
             </Typo>
           </View>
+        </View>
 
-          <View style={styles.accountOptions}>
-            {accountOptions.map((item, index) => {
-              return (
+        {/* account options */}
+        <View style={styles.accountOptions}>
+          {accountOptions.map((item, index) => (
+            <View key={index.toString()} style={styles.listItem}>
+              <TouchableOpacity
+                style={styles.flexRow}
+                onPress={() => handlePress(item)}
+              >
                 <Animated.View
-                  key={index.toString()}
                   entering={FadeInDown.delay(index * 50)
                     .springify()
                     .damping(14)}
-                  style={styles.listItem}
+                  style={[styles.listIcon, { backgroundColor: item.bgColor }]}
                 >
-                  <TouchableOpacity
-                    style={styles.flexRow}
-                    onPress={() => handlePress(item)}
-                  >
-                    <View
-                      style={[
-                        styles.listIcon,
-                        {
-                          backgroundColor: item?.bgColor,
-                        },
-                      ]}
-                    >
-                      {item.icon && item.icon}
-                    </View>
-                    <Typo size={16} style={{ flex: 1 }} fontWeight={"500"}>
-                      {item.title}
-                    </Typo>
-                    <Icons.CaretRight
-                      size={verticalScale(20)}
-                      weight="bold"
-                      color={colors.white}
-                    />
-                  </TouchableOpacity>
+                  {item.icon}
                 </Animated.View>
-              );
-            })}
-          </View>
+                <Typo size={16} style={{ flex: 1 }} fontWeight="500">
+                  {item.title}
+                </Typo>
+                <Icons.CaretRight
+                  size={verticalScale(20)}
+                  weight="bold"
+                  color={colors.white}
+                />
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
+
+        {/* Custom Alert for Logout */}
+        <CustomAlert
+          visible={showLogoutModal}
+          title="Confirm"
+          message="Are you sure you want to Logout?"
+          confirmText="Logout"
+          cancelText="Cancel"
+          onConfirm={handleLogout}
+          onCancel={() => setShowLogoutModal(false)}
+        />
       </View>
-    </ScreenWrapper>
+    </ScreenWrappper>
   );
 };
 
@@ -145,48 +131,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: spacingX._20,
+    paddingVertical: spacingY._50,
   },
-
   userInfo: {
     marginTop: verticalScale(30),
     alignItems: "center",
     gap: spacingY._15,
   },
-
-  avatarContainer: {
-    position: "relative",
-    alignSelf: "center",
-  },
-
   avatar: {
     alignSelf: "center",
     backgroundColor: colors.neutral300,
     height: verticalScale(135),
     width: verticalScale(135),
     borderRadius: 200,
-    // overflow: "hidden",
-    // position: "relative"
   },
-
-  editIcon: {
-    position: "absolute",
-    bottom: 5,
-    right: 8,
-    borderRadius: 50,
-    backgroundColor: colors.neutral100,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
-    padding: 5,
-  },
-
   nameContainer: {
     gap: verticalScale(4),
     alignItems: "center",
   },
-
   listIcon: {
     height: verticalScale(44),
     width: verticalScale(44),
@@ -194,22 +156,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius._15,
-    borderCurve: "continuous",
-    marginRight: spacingX._15,
   },
-
   listItem: {
     marginBottom: verticalScale(17),
   },
-
   accountOptions: {
     marginTop: spacingY._35,
   },
-
   flexRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
+    gap: spacingX._10,
   },
 });

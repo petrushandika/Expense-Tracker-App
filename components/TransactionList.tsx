@@ -1,14 +1,19 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
-import { TransactionItemProps, TransactionListType } from "@/types";
+import { expenseCategories, incomeCategory } from "@/constants/data";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import {
+  TransactionItemProps,
+  TransactionListType,
+  TransactionType,
+} from "@/types";
 import { verticalScale } from "@/utils/styling";
-import Typo from "./Typo";
 import { FlashList } from "@shopify/flash-list";
-import index from "@/app";
-import Loading from "./Loading";
-import { expenseCategories } from "@/constants/data";
+import { useRouter } from "expo-router";
+import { Timestamp } from "firebase/firestore";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import Loading from "./Loading";
+import Typo from "./Typo";
 
 const TransactionList = ({
   data,
@@ -16,22 +21,36 @@ const TransactionList = ({
   loading,
   emptyListMessage,
 }: TransactionListType) => {
-  const handleClick = () => {};
+  const router = useRouter();
+  const handleClick = (item: TransactionType) => {
+    router.push({
+      pathname: "/(modals)/transactionModal",
+      params: {
+        id: item?.id,
+        type: item?.type,
+        amount: item.amount.toString(),
+        category: item?.category,
+        date: (item?.date as Timestamp).toDate().toISOString(),
+        description: item?.description,
+        image: item?.image || "",
+        walletId: item?.walletId,
+        uid: item?.uid,
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
       {title && (
-        <Typo size={20} fontWeight={"500"}>
+        <Typo size={20} fontWeight={500}>
           {title}
         </Typo>
       )}
-
       <View style={styles.list}>
-        {" "}
         <FlashList
           data={data}
           renderItem={({ item, index }) => (
-            <TransactionItem
+            <TransctionItem
               item={item}
               index={index}
               handleClick={handleClick}
@@ -39,45 +58,53 @@ const TransactionList = ({
           )}
           estimatedItemSize={60}
         />
+        {!loading && data.length == 0 && (
+          <Typo
+            size={15}
+            color={colors.neutral400}
+            style={{
+              textAlign: "center",
+              marginTop: spacingY._15,
+            }}
+          >
+            {emptyListMessage}
+          </Typo>
+        )}
+
+        {loading && (
+          <View style={{ top: verticalScale(100) }}>
+            <Loading />
+          </View>
+        )}
       </View>
-
-      {!loading && data.length == 0 && (
-        <Typo
-          size={15}
-          color={colors.neutral400}
-          style={{ textAlign: "center", marginTop: spacingY._15 }}
-        >
-          {emptyListMessage}
-        </Typo>
-      )}
-
-      {loading && (
-        <View style={{ top: verticalScale(100) }}>
-          <Loading />
-        </View>
-      )}
     </View>
   );
 };
 
-const TransactionItem = ({
-  item,
-  index,
-  handleClick,
-}: TransactionItemProps) => {
-  let category = expenseCategories["utilities"];
-  const IconComponent = category.icon;
+const TransctionItem = ({ item, index, handleClick }: TransactionItemProps) => {
+  let category =
+    item?.type == "income" ? incomeCategory : expenseCategories[item.category!];
+  const IconComp = category.icon;
 
+  const date = (item.date as Timestamp)?.toDate()?.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 70)
         .springify()
         .damping(14)}
     >
-      <TouchableOpacity style={styles.row} onPress={() => handleClick(item)}>
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => {
+          handleClick(item);
+        }}
+      >
         <View style={[styles.icon, { backgroundColor: category.bgColor }]}>
-          {IconComponent && (
-            <IconComponent
+          {IconComp && (
+            <IconComp
               size={verticalScale(25)}
               weight="fill"
               color={colors.white}
@@ -85,23 +112,27 @@ const TransactionItem = ({
           )}
         </View>
 
-        <View style={styles.cartegoryDes}>
+        <View style={styles.categoryDes}>
           <Typo size={17}>{category.label}</Typo>
           <Typo
             size={12}
             color={colors.neutral400}
             textProps={{ numberOfLines: 1 }}
           >
-            Paid wifi bill
+            {item?.description}
           </Typo>
         </View>
 
         <View style={styles.amountDate}>
-          <Typo fontWeight={"500"} color={colors.rose}>
-            - $23
+          <Typo
+            fontWeight={500}
+            color={item.type == "income" ? colors.primary : colors.rose}
+          >
+            {item.type == "income" ? "+ Rp " : "- Rp "}
+            {item.amount}
           </Typo>
           <Typo size={13} color={colors.neutral400}>
-            12 Jan
+            {date}
           </Typo>
         </View>
       </TouchableOpacity>
@@ -112,29 +143,14 @@ const TransactionItem = ({
 export default TransactionList;
 
 const styles = StyleSheet.create({
-  container: {
-    gap: spacingY._17,
-    // flex: 1,
-    // backgroundColor: "red",
+  amountDate: {
+    alignItems: "flex-end",
+    gap: 3,
   },
-
-  list: {
-    minHeight: 3,
+  categoryDes: {
+    flex: 1,
+    gap: 2.5,
   },
-
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: spacingX._12,
-    marginBottom: spacingY._12,
-
-    backgroundColor: colors.neutral800,
-    padding: spacingY._10,
-    paddingHorizontal: spacingY._10,
-    borderRadius: radius._17,
-  },
-
   icon: {
     height: verticalScale(44),
     aspectRatio: 1,
@@ -143,14 +159,21 @@ const styles = StyleSheet.create({
     borderRadius: radius._12,
     borderCurve: "continuous",
   },
-
-  cartegoryDes: {
-    flex: 1,
-    gap: 2.5,
+  list: {
+    minHeight: 3,
   },
-
-  amountDate: {
-    alignItems: "flex-end",
-    gap: 3,
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacingX._12,
+    marginBottom: spacingY._12,
+    backgroundColor: colors.neutral800,
+    padding: spacingY._10,
+    paddingHorizontal: spacingY._10,
+    borderRadius: radius._17,
+  },
+  container: {
+    gap: spacingY._17,
   },
 });

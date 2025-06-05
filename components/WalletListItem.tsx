@@ -1,13 +1,13 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
-import { WalletType } from "@/types";
-import { Router } from "expo-router";
-import { verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
+import { WalletType } from "@/types";
+import { verticalScale } from "@/utils/styling";
 import { Image } from "expo-image";
-import Typo from "./Typo";
+import { Router } from "expo-router";
 import * as Icons from "phosphor-react-native";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import Typo from "./Typo";
 
 const WalletListItem = ({
   item,
@@ -28,28 +28,27 @@ const WalletListItem = ({
       },
     });
   };
-
   return (
     <Animated.View
-      entering={FadeInDown.delay(index * 50)
+      entering={FadeInDown.delay(index * 80)
         .springify()
-        .damping(13)}
+        .damping(14)}
     >
-      <TouchableOpacity style={styles.itemContainer} onPress={openWallet}>
-        <Image
-          source={item.image}
-          contentFit="cover"
-          transition={100}
-          style={styles.image}
-        />
-
-        <View style={styles.textContainer}>
-          <Typo size={16}>{item.name}</Typo>
-          <Typo size={14} color={colors.neutral400}>
-            ${item.amount}
+      <TouchableOpacity style={styles.container} onPress={openWallet}>
+        <View style={styles.imageConatiner}>
+          <Image
+            style={{ flex: 1 }}
+            source={item?.image}
+            contentFit="cover"
+            transition={100}
+          />
+        </View>
+        <View style={styles.nameContainer}>
+          <Typo size={18}>{item.name}</Typo>
+          <Typo size={16} color={colors.neutral400}>
+            Rp {item.amount}
           </Typo>
         </View>
-
         <Icons.CaretRight
           size={verticalScale(20)}
           weight="bold"
@@ -63,24 +62,23 @@ const WalletListItem = ({
 export default WalletListItem;
 
 const styles = StyleSheet.create({
-  itemContainer: {
+  container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: verticalScale(10),
-    backgroundColor: "transparent",
-    borderBottomColor: colors.neutral800,
+    marginBottom: verticalScale(17),
   },
-  image: {
+  imageConatiner: {
     height: verticalScale(45),
     width: verticalScale(45),
-    borderRadius: radius._10,
-    overflow: "hidden",
-    marginRight: spacingX._15,
     borderWidth: 1,
     borderColor: colors.neutral600,
+    borderRadius: radius._12,
+    borderCurve: "continuous",
+    overflow: "hidden",
   },
-  textContainer: {
+  nameContainer: {
     flex: 1,
-    justifyContent: "center",
+    gap: 2,
+    marginLeft: spacingX._10,
   },
 });

@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
 import { HeaderProps } from "@/types";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import Typo from "./Typo";
 
 const Header = ({ title = "", leftIcon, style }: HeaderProps) => {
@@ -11,7 +11,10 @@ const Header = ({ title = "", leftIcon, style }: HeaderProps) => {
         <Typo
           size={22}
           fontWeight={"600"}
-          style={{ textAlign: "center", width: leftIcon ? "82%" : "100%" }}
+          style={{
+            textAlign: "center",
+            width: leftIcon ? "82%" : "100%",
+          }}
         >
           {title}
         </Typo>
@@ -28,7 +31,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
   },
-
   leftIcon: {
     alignSelf: "flex-start",
   },

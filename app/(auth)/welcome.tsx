@@ -1,5 +1,5 @@
 import Button from "@/components/Button";
-import ScreenWrapper from "@/components/ScreenWrapper";
+import ScreenWrappper from "@/components/ScreenWrappper";
 import Typo from "@/components/Typo";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
@@ -8,110 +8,120 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
-const welcome = () => {
-  const router = useRouter();
+const Welcome = () => {
+  const route = useRouter();
 
   return (
-    <ScreenWrapper>
+    <ScreenWrappper>
       <View style={styles.container}>
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/login")}
-          style={styles.loginButton}
-        >
-          <Typo fontWeight={"500"}>Sign In</Typo>
-        </TouchableOpacity>
+        {/* login button & image */}
+        <View>
+          <TouchableOpacity
+            style={styles.logicButton}
+            onPress={() => route.push("/(auth)/login")}
+          >
+            <Typo fontWeight={"500"} style={styles.btn}>
+              Sign in
+            </Typo>
+          </TouchableOpacity>
+          <Animated.Image
+            entering={FadeIn.duration(1500)}
+            source={require("../../assets/images/welcome.png")}
+            style={styles.welcomeImage}
+            resizeMode="contain"
+          />
+        </View>
 
-        <Animated.Image
-          entering={FadeIn.duration(2000)}
-          source={require("../../assets/images/welcome.png")}
-          style={styles.welcomeImage}
-          contentFit="contain"
-        />
+        {/* footer */}
         <View style={styles.footer}>
           <Animated.View
             entering={FadeInDown.duration(1000).springify().damping(12)}
             style={{ alignItems: "center" }}
           >
-            <Typo size={30} fontWeight={"800"}>
-              Always take control
+            <Typo size={30} fontWeight={800}>
+              Always Take Control
             </Typo>
-            <Typo size={30} fontWeight={"800"}>
-              of your finances
+            <Typo size={30} fontWeight={800}>
+              Of Your Finances.
             </Typo>
           </Animated.View>
 
           <Animated.View
             entering={FadeInDown.duration(1000)
-              .delay(100)
+              .delay(150)
               .springify()
               .damping(12)}
             style={{ alignItems: "center", gap: 2 }}
           >
             <Typo size={17} color={colors.textLight}>
-              Always take control
+              Finances must be managed,
             </Typo>
             <Typo size={17} color={colors.textLight}>
-              of your finances
+              not just spent.
             </Typo>
           </Animated.View>
 
           <Animated.View
             entering={FadeInDown.duration(1000)
-              .delay(200)
+              .delay(300)
               .springify()
               .damping(12)}
             style={styles.buttonContainer}
           >
-            <Button onPress={() => router.push("/(auth)/register")}>
-              <Typo size={22} color={colors.neutral900} fontWeight={"600"}>
+            <Button onPress={() => route.navigate("/(auth)/register")}>
+              <Typo size={22} color={colors.neutral900} fontWeight={600}>
                 Get Started
               </Typo>
             </Button>
           </Animated.View>
         </View>
       </View>
-    </ScreenWrapper>
+    </ScreenWrappper>
   );
 };
 
-export default welcome;
+// 👇 Hides the white top header
+export const options = {
+  headerShown: false,
+};
+
+export default Welcome;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingVertical: spacingY._30,
+    paddingTop: spacingY._50,
   },
-
   welcomeImage: {
     width: "100%",
     height: verticalScale(300),
     alignSelf: "center",
-    marginTop: verticalScale(100),
   },
-
-  loginButton: {
+  logicButton: {
     alignSelf: "flex-end",
     marginRight: spacingX._20,
   },
-
   footer: {
-    backgroundColor: colors.neutral900,
+    backgroundColor: colors.neutral800,
     alignItems: "center",
     paddingTop: verticalScale(30),
-    paddingBottom: verticalScale(45),
+    paddingBottom: verticalScale(60),
     gap: spacingY._20,
-
-    shadowColor: "#ffffff",
+    shadowColor: "white",
     shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-
-    elevation: 15,
+    elevation: 10,
+    shadowRadius: 25,
+    shadowOpacity: 0.15,
   },
-
   buttonContainer: {
     width: "100%",
     paddingHorizontal: spacingX._25,
+  },
+  btn: {
+    backgroundColor: colors.neutral700,
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: spacingX._15,
+    borderRadius: 43,
   },
 });

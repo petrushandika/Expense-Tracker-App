@@ -1,3 +1,21 @@
+import BackButton from "@/components/BackButton";
+import Button from "@/components/Button";
+import CustomAlert from "@/components/CustomAlert";
+import Header from "@/components/Header";
+import Input from "@/components/Input";
+import ModalWrapper from "@/components/ModalWrapper";
+import Typo from "@/components/Typo";
+import { colors, spacingX, spacingY } from "@/constants/theme";
+import { useAuth } from "@/contexts/authContext";
+import { getProfileImage } from "@/services/imageService";
+import { updateUser } from "@/services/userService";
+import { UserDataType } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import * as Icons from "phosphor-react-native";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -5,33 +23,40 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { colors, spacingX, spacingY } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
-import ModalWrapper from "@/components/ModalWrapper";
-import Header from "@/components/Header";
-import BackButton from "@/components/BackButton";
-import { Image } from "expo-image";
-import { getProfileImage } from "@/services/imageService";
-import * as Icons from "phosphor-react-native";
-import Typo from "@/components/Typo";
-import Input from "@/components/Input";
-import { UserDataType } from "@/types";
-import Button from "@/components/Button";
-import { useAuth } from "@/contexts/authContext";
-import { updateUser } from "@/services/userService";
-import { router } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
 
 const ProfileModal = () => {
-  const { user, updateUserData } = useAuth();
   const [userData, setUserData] = useState<UserDataType>({
     name: "",
     image: null,
   });
-
   const [loading, setLoading] = useState(false);
 
+  const { user, updateUserData } = useAuth();
+  const router = useRouter();
+  const [showAlert, setShowAlert] = useState(false);
+
+  console.log("Profile modal opened");
+  console.trace("Profile modal stack trace");
+
+  const onSubmit = async () => {
+    let { name, image } = userData;
+    if (!name.trim()) {
+      setShowAlert(true);
+
+      return;
+    }
+
+    setLoading(true);
+    const res = await updateUser(user?.uid as string, userData);
+    setLoading(false);
+
+    if (res.success) {
+      updateUserData(user?.uid as string);
+      router.back();
+    } else {
+      Alert.alert("User", res.msg);
+    }
+  };
   useEffect(() => {
     setUserData({
       name: user?.name || "",
@@ -39,10 +64,11 @@ const ProfileModal = () => {
     });
   }, [user]);
 
-  const onPickImage = async () => {
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      //   allowsEditing: true,
+      //allowsEditing: true,
       aspect: [4, 3],
       quality: 0.5,
     });
@@ -54,43 +80,25 @@ const ProfileModal = () => {
     }
   };
 
-  const onSubmit = async () => {
-    let { name, image } = userData;
-    if (!name.trim()) {
-      Alert.alert("User", "Please fill all the fields");
-      return;
-    }
-
-    setLoading(true);
-    const res = await updateUser(user?.uid as string, userData);
-    setLoading(false);
-    if (res.success) {
-      updateUserData(user?.uid as string);
-      router.back();
-    } else {
-      Alert.alert("User", res.msg);
-    }
-  };
-
   return (
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title="Update Profile"
+          title="Upadate Profile"
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
 
+        {/* form */}
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.avatarContainer}>
             <Image
               style={styles.avatar}
-              source={getProfileImage(userData.image)}
+              source={getProfileImage(null)}
               contentFit="cover"
               transition={100}
             />
-
-            <TouchableOpacity onPress={onPickImage} style={styles.editIcon}>
+            <TouchableOpacity onPress={pickImage} style={styles.editIcon}>
               <Icons.Pencil
                 size={verticalScale(20)}
                 color={colors.neutral800}
@@ -110,7 +118,6 @@ const ProfileModal = () => {
           </View>
         </ScrollView>
       </View>
-
       <View style={styles.footer}>
         <Button onPress={onSubmit} loading={loading} style={{ flex: 1 }}>
           <Typo color={colors.black} fontWeight={"700"}>
@@ -118,6 +125,15 @@ const ProfileModal = () => {
           </Typo>
         </Button>
       </View>
+      <CustomAlert
+        visible={showAlert}
+        title="User"
+        message="Please Enter all the fields"
+        confirmText="Ok"
+        onConfirm={() => {
+          setShowAlert(false);
+        }}
+      />
     </ModalWrapper>
   );
 };
@@ -127,11 +143,10 @@ export default ProfileModal;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     paddingHorizontal: spacingY._20,
-    paddingVertical: spacingY._30,
+    paddingVertical: spacingY._50,
   },
-
   footer: {
     alignItems: "center",
     flexDirection: "row",
@@ -143,17 +158,14 @@ const styles = StyleSheet.create({
     marginBottom: spacingY._5,
     borderTopWidth: 1,
   },
-
   form: {
     gap: spacingY._30,
     marginTop: spacingY._15,
   },
-
   avatarContainer: {
     position: "relative",
     alignSelf: "center",
   },
-
   avatar: {
     alignSelf: "center",
     backgroundColor: colors.neutral300,
@@ -163,7 +175,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.neutral500,
   },
-
   editIcon: {
     position: "absolute",
     bottom: spacingY._5,
@@ -177,7 +188,6 @@ const styles = StyleSheet.create({
     elevation: 4,
     padding: spacingY._7,
   },
-
   inputContainer: {
     gap: spacingY._10,
   },

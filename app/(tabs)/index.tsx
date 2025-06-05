@@ -1,45 +1,62 @@
 import Button from "@/components/Button";
-import ScreenWrapper from "@/components/ScreenWrapper";
+import HomeCard from "@/components/HomeCard";
+import ScreenWrappper from "@/components/ScreenWrappper";
+import TransactionList from "@/components/TransactionList";
 import Typo from "@/components/Typo";
 import { auth } from "@/config/firebase";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { useAuth } from "@/contexts/authContext";
+import useFetchData from "@/hooks/useFetchData";
+import { TransactionType } from "@/types";
 import { verticalScale } from "@/utils/styling";
-import { signOut } from "firebase/auth";
-import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import * as Icons from "phosphor-react-native";
-import HomeCard from "@/components/HomeCard";
-import TransactionList from "@/components/TransactionList";
 import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import { limit, orderBy, where } from "firebase/firestore";
+import * as Icons from "phosphor-react-native";
+import React from "react";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const Home = () => {
   const { user } = useAuth();
   const router = useRouter();
 
+  const handleLogOut = async () => {
+    await signOut(auth);
+  };
+
+  const constrainsts = [
+    where("uid", "==", user?.uid),
+    orderBy("date", "desc"),
+    limit(25),
+  ];
+  const {
+    data: recentTransaction,
+    error,
+    loading: transactionLoading,
+  } = useFetchData<TransactionType>("transactions", constrainsts);
+
   return (
-    <ScreenWrapper>
+    <ScreenWrappper>
       <View style={styles.container}>
+        {/* header */}
         <View style={styles.header}>
           <View style={{ gap: 4 }}>
-            <Typo size={16} color={colors.neutral400}>
-              Hello,
+            <Typo size={21} color={colors.neutral300}>
+              Hello👋,
             </Typo>
-            <Typo size={20} fontWeight={"500"}>
+            <Typo size={28} fontWeight={"500"}>
               {user?.name}
             </Typo>
           </View>
-
-          <TouchableOpacity style={styles.searchIcon}>
+          <TouchableOpacity
+            onPress={() => {
+              router.push("/(modals)/searchModal");
+            }}
+            style={styles.searchIcon}
+          >
             <Icons.MagnifyingGlass
+              color={colors.neutral300}
               size={verticalScale(22)}
-              color={colors.neutral200}
               weight="bold"
             />
           </TouchableOpacity>
@@ -48,41 +65,23 @@ const Home = () => {
           contentContainerStyle={styles.scrollViewStyle}
           showsVerticalScrollIndicator={false}
         >
+          {/* cards */}
           <View>
             <HomeCard />
           </View>
 
           <TransactionList
-            data={[
-              {
-                id: "1",
-                type: "expense",
-                amount: 50000,
-                category: "Food",
-                date: new Date(),
-                description: "Lunch at cafe",
-                uid: "user123",
-                walletId: "wallet123",
-              },
-              {
-                id: "2",
-                type: "income",
-                amount: 150000,
-                category: "Salary",
-                date: new Date(),
-                description: "Monthly salary",
-                uid: "user123",
-                walletId: "wallet123",
-              },
-            ]}
-            loading={false}
-            emptyListMessage="No Transactions added yet!"
-            title="Recent Transactions"
+            data={recentTransaction}
+            loading={transactionLoading}
+            emptyListMessage="No Transaction added Yet!"
+            title="Recent Transcation"
           />
         </ScrollView>
         <Button
           style={styles.floatingButton}
-          onPress={() => router.push("/(modals)/transactionModal")}
+          onPress={() => {
+            router.push("/(modals)/transactionModal");
+          }}
         >
           <Icons.Plus
             color={colors.black}
@@ -91,32 +90,18 @@ const Home = () => {
           />
         </Button>
       </View>
-    </ScreenWrapper>
+    </ScreenWrappper>
   );
 };
 
 export default Home;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: spacingX._20,
-    marginTop: verticalScale(8),
+  scrollViewStyle: {
+    marginTop: spacingY._10,
+    paddingBottom: verticalScale(100),
+    gap: spacingY._25,
   },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacingY._10,
-  },
-
-  searchIcon: {
-    backgroundColor: colors.neutral700,
-    padding: spacingX._10,
-    borderRadius: 50,
-  },
-
   floatingButton: {
     height: verticalScale(50),
     width: verticalScale(50),
@@ -125,10 +110,21 @@ const styles = StyleSheet.create({
     bottom: verticalScale(30),
     right: verticalScale(30),
   },
-
-  scrollViewStyle: {
-    marginTop: spacingY._10,
-    paddingBottom: verticalScale(100),
-    gap: spacingY._25,
+  searchIcon: {
+    backgroundColor: colors.neutral700,
+    padding: spacingX._10,
+    borderRadius: 50,
+  },
+  header: {
+    paddingTop: spacingY._50,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacingY._10,
+  },
+  container: {
+    flex: 1,
+    marginTop: verticalScale(8),
+    paddingHorizontal: spacingX._20,
   },
 });

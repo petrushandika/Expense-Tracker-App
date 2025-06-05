@@ -1,30 +1,22 @@
 {
   "expo": {
-    "name": "expense-tracker-app",
-    "slug": "expense-tracker-app",
+    "name": "expense_tracker_app",
+    "slug": "expense_tracker_app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "expensetrackerapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.begdar8zouhair.expensetrackerapp",
-      "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "We need access to your photos to let you upload profile pictures."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.begdar8zouhair.expensetrackerapp",
-      "permissions": [
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
-      ]
+      "edgeToEdgeEnabled": true
     },
     "web": {
       "bundler": "metro",
@@ -38,15 +30,8 @@
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
-          "contentFit": "contain",
+          "resizeMode": "contain",
           "backgroundColor": "#ffffff"
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "We need access to your photos to let you upload profile pictures.",
-          "cameraPermission": "We need access to your camera to let you take profile pictures."
         }
       ]
     ],

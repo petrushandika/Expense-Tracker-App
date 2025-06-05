@@ -5,12 +5,12 @@ import { uploadFileToCloudinary } from "./imageService";
 
 export const updateUser = async (
   uid: string,
-  updatedData: UserDataType
+  updateData: UserDataType
 ): Promise<ResponseType> => {
   try {
-    if (updatedData.image && updatedData?.image?.uri) {
+    if (updateData.image && updateData?.image?.uri) {
       const imageUploadRes = await uploadFileToCloudinary(
-        updatedData.image,
+        updateData.image,
         "users"
       );
       if (!imageUploadRes.success) {
@@ -19,15 +19,17 @@ export const updateUser = async (
           msg: imageUploadRes.msg || "Failed to upload image",
         };
       }
-      updatedData.image = imageUploadRes.data;
+      updateData.image = imageUploadRes.data;
     }
-
     const userRef = doc(firestore, "users", uid);
-    await updateDoc(userRef, updatedData);
-
-    return { success: true, msg: "updated successfully" };
+    await updateDoc(userRef, updateData);
+    return { success: true, msg: "Updated Successfully" };
   } catch (error: any) {
-    console.log("error updating user: ", error);
+    console.log("Error update user", error);
     return { success: false, msg: error?.message };
   }
 };
+
+//
+
+//

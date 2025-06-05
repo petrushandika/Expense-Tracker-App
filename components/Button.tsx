@@ -2,7 +2,7 @@ import { colors, radius } from "@/constants/theme";
 import { CustomButtonProps } from "@/types";
 import { verticalScale } from "@/utils/styling";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Loading from "./Loading";
 
 const Button = ({
@@ -18,9 +18,10 @@ const Button = ({
       </View>
     );
   }
+
   return (
     <TouchableOpacity onPress={onPress} style={[styles.button, style]}>
-      {children}
+      <Text>{children}</Text>
     </TouchableOpacity>
   );
 };

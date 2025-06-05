@@ -1,13 +1,13 @@
 import { auth, firestore } from "@/config/firebase";
 import { AuthContextType, UserType } from "@/types";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -15,25 +15,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<UserType>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log("firebase user", firebaseUser);
       if (firebaseUser) {
         setUser({
           uid: firebaseUser?.uid,
-          name: firebaseUser.displayName,
-          email: firebaseUser.email,
+          email: firebaseUser?.email,
+          name: firebaseUser?.displayName,
         });
-        updateUserData(firebaseUser.uid);
+        updateUserData(firebaseUser?.uid);
         router.replace("/(tabs)");
       } else {
         setUser(null);
         router.replace("/(auth)/welcome");
       }
     });
-
-    return () => unsub();
+    return () => {
+      unsub();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -42,14 +43,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: true };
     } catch (error: any) {
       let msg = error.message;
-      console.log("error message", msg);
-      if (msg.includes("(auth)/invalid-credential")) msg = "Wrong Credentials";
-      if (msg.includes("(auth)/invalid-email")) msg = "Invalid Email";
+      console.log("error:", msg);
+      if (msg.includes("(auth/invalid-credential)"))
+        msg = "Invalid credentials";
+      if (msg.includes("(auth/invalid-email)")) msg = "Invalid email";
       return { success: false, msg };
     }
   };
-
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
     try {
       let response = await createUserWithEmailAndPassword(
         auth,
@@ -59,15 +60,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await setDoc(doc(firestore, "users", response?.user?.uid), {
         name,
         email,
+        image: null,
         uid: response?.user?.uid,
       });
+
       return { success: true };
     } catch (error: any) {
       let msg = error.message;
-      console.log("error message", msg);
-      if (msg.includes("(auth)/email-already-in-use"))
-        msg = "This Email Is Already In Use";
-      if (msg.includes("(auth)/invalid-email")) msg = "Invalid Email";
+      if (msg.includes("(auth/email-already-in-use)"))
+        msg = "This email is already in use";
+      if (msg.includes("(auth/invalid-email)")) msg = "Invalid email";
       return { success: false, msg };
     }
   };
@@ -81,15 +83,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const data = docSnap.data();
         const userData: UserType = {
           uid: data?.uid,
-          name: data.name || null,
-          email: data.email || null,
-          image: data.image || null,
+          email: data?.email || null,
+          name: data?.name || null,
+          image: data?.image || null,
         };
         setUser({ ...userData });
       }
     } catch (error: any) {
       let msg = error.message;
-      console.log("error", error);
+      console.log("error:", error);
     }
   };
 
@@ -109,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be wrapped inside AuthProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

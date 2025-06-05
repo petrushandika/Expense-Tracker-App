@@ -6,7 +6,7 @@ import { CaretLeft } from "phosphor-react-native";
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 
-const BackButton = ({ style, iconSize = 26 }: BackButtonProps) => {
+const BackButton = ({ style, iconSize = 24 }: BackButtonProps) => {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -26,10 +26,10 @@ export default BackButton;
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.neutral600,
+    backgroundColor: colors.neutral700,
     alignSelf: "flex-start",
     borderRadius: radius._12,
     borderCurve: "continuous",
-    padding: 5,
+    padding: 10,
   },
 });

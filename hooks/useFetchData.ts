@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import { firestore } from "@/config/firebase";
 import {
   collection,
   onSnapshot,
   query,
   QueryConstraint,
 } from "firebase/firestore";
-import { firestore } from "@/config/firebase";
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 
 const useFetchData = <T>(
   collectionName: string,
@@ -39,7 +39,6 @@ const useFetchData = <T>(
         setLoading(false);
       }
     );
-
     return () => unsub();
   }, []);
 

@@ -11,28 +11,28 @@ import {
 
 const { height } = Dimensions.get("window");
 
-const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
-  let paddingTop =
-    Platform.OS === "android"
-      ? (StatusBar.currentHeight || 0) + 10
-      : height * 0.06;
+const ScreenWrappper = ({ style, children }: ScreenWrapperProps) => {
+  let paddingTop = Platform.OS === "ios" ? height * 0.06 : 0;
   return (
     <View
       style={[
         {
-          // paddingTop,
+          paddingTop,
           flex: 1,
           backgroundColor: colors.neutral900,
         },
         style,
       ]}
     >
-      <StatusBar barStyle="light-content" backgroundColor={colors.neutral900} />
+      <StatusBar
+        barStyle={"light-content"}
+        backgroundColor={colors.neutral900}
+      />
       {children}
     </View>
   );
 };
 
-export default ScreenWrapper;
+export default ScreenWrappper;
 
 const styles = StyleSheet.create({});

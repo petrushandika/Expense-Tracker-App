@@ -1,13 +1,13 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ImageUploadProps } from "@/types";
-import * as Icons from "phosphor-react-native";
 import { colors, radius } from "@/constants/theme";
-import Typo from "./Typo";
+import { getFilePath } from "@/services/imageService";
+import { ImageUploadProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import { Image } from "expo-image";
-import { getFilePath } from "@/services/imageService";
 import * as ImagePicker from "expo-image-picker";
+import * as Icons from "phosphor-react-native";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Typo from "./Typo";
 
 const ImageUpload = ({
   file = null,
@@ -18,9 +18,10 @@ const ImageUpload = ({
   placeholder = "",
 }: ImageUploadProps) => {
   const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      //   allowsEditing: true,
+      //allowsEditing: true,
       aspect: [4, 3],
       quality: 0.5,
     });
@@ -31,19 +32,14 @@ const ImageUpload = ({
       onSelect(result.assets[0]);
     }
   };
-
   return (
     <View>
       {!file && (
-        <TouchableOpacity
-          onPress={pickImage}
-          style={[styles.inputContainer, containerStyle && containerStyle]}
-        >
-          <Icons.UploadSimple color={colors.neutral200} />
-          {placeholder && <Typo size={15}>{placeholder}</Typo>}
+        <TouchableOpacity onPress={pickImage} style={styles.inputContainer}>
+          <Icons.UploadSimple color={colors.neutral300} />
+          {placeholder && <Typo size={16}>{placeholder}</Typo>}
         </TouchableOpacity>
       )}
-
       {file && (
         <View style={[styles.image, imageStyle && imageStyle]}>
           <Image
@@ -55,8 +51,8 @@ const ImageUpload = ({
           <TouchableOpacity style={styles.deleteIcon} onPress={onClear}>
             <Icons.XCircle
               size={verticalScale(24)}
-              weight="fill"
               color={colors.white}
+              weight="fill"
             />
           </TouchableOpacity>
         </View>
@@ -80,7 +76,6 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral500,
     borderStyle: "dashed",
   },
-
   image: {
     height: scale(150),
     width: scale(150),
@@ -88,7 +83,6 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     overflow: "hidden",
   },
-
   deleteIcon: {
     position: "absolute",
     top: scale(6),
